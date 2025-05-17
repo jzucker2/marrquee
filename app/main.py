@@ -182,5 +182,5 @@ def get_image(image_id: str, target: CacheTarget = Query(CacheTarget.BOTH)):
 @app.post("/cache/clear")
 def clear_cache(target: CacheTarget = Query(CacheTarget.BOTH)):
     """Clear the cache from the specified folder(s)."""
-    IMAGE_CACHE.clean_cache(target=target)
+    IMAGE_CACHE.clear_cache(target=target)
     return {"status": "success", "cleared": target}
