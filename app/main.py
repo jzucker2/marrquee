@@ -139,29 +139,45 @@ def get_random_cached_custom_image():
         media_type="image/jpeg",
         filename=filename)
 
-@app.get("/images", response_model=List[str])
-def list_files(target: CacheTarget = Query(CacheTarget.both)):
-    """List image files from the specified cache folder(s)."""
-    from_target = {
-        CacheTarget.movies: CacheTarget.MOVIES,
-        CacheTarget.custom: CacheTarget.CUSTOM,
-        CacheTarget.both: CacheTarget.BOTH,
-    }[target]
 
-    files = CustomCache.get_all_files(from_target)
-    filenames = [os.path.basename(f) for f in files]
-    return filenames
+def parse_target(target_str: str) -> CacheTarget:
+    """Map string to CacheTarget enum (case-insensitive)."""
+    target_str = target_str.lower()
+    if target_str == "movies":
+        return CacheTarget.MOVIES
+    elif target_str == "custom":
+        return CacheTarget.CUSTOM
+    elif target_str == "both":
+        return CacheTarget.BOTH
+    else:
+        raise ValueError("Invalid cache target")
+
+
+@app.get("/images", response_model=List[str])
+def list_images(target: CacheTarget = Query("both", description="movies, custom, or both")):  # noqa: E501
+    """List image files from the specified cache folder(s)."""
+    try:
+        cache_target = parse_target(target)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid target. Use: movies, custom, or both.")
+
+    files = CustomCache.get_all_files(cache_target)
+    return [os.path.basename(f) for f in files]
+
 
 @app.get("/images/{image_id}")
-def get_file(image_id: str, target: CacheTarget = Query(CacheTarget.both)):
+def get_image(image_id: str, target: CacheTarget = Query("both", description="movies, custom, or both")):  # noqa: E501
     """Serve image file by filename from the specified folder(s)."""
-    from_target = {
-        CacheTarget.movies: CacheTarget.MOVIES,
-        CacheTarget.custom: CacheTarget.CUSTOM,
-        CacheTarget.both: CacheTarget.BOTH,
-    }[target]
+    try:
+        cache_target = parse_target(target)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid target. Use: movies, custom, or both.")
 
-    for folder in CustomCache.cache_dirs(from_target):
+    for folder in CustomCache.cache_dirs(cache_target):
         filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
             return FileResponse(filepath, media_type="image/jpeg")
