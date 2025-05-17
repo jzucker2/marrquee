@@ -75,6 +75,14 @@ class CustomCache:
                         now - os.path.getmtime(filepath) > MAX_CACHE_AGE):
                     os.remove(filepath)
 
+    def clear_cache(self, target: CacheTarget = CacheTarget.BOTH) -> None:
+        """Delete cache files older than MAX_CACHE_AGE
+        in specified folder(s)."""
+        for folder in self.cache_dirs(target):
+            for filename in os.listdir(folder):
+                filepath = os.path.join(folder, filename)
+                os.remove(filepath)
+
     def get_file_path(self, filename: str, target: CacheTarget) -> str:
         """
         Returns the full path to the file in the specified target folder.
