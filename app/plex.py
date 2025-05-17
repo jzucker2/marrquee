@@ -11,13 +11,18 @@ BASE_URL = os.environ.get("PLEX_BASE_URL")
 TOKEN = os.environ.get("PLEX_TOKEN")
 
 
+log.debug(f'Plex BASE_URL: {BASE_URL}')
+
+
 plex = PlexServer(BASE_URL, TOKEN)
 
 
 def get_random_movie_poster():
     movies = plex.library.section('Movies').all()
     random_movie = random.choice(movies)
+    log.debug(f'Plex random_movie: {random_movie}')
     poster_url = f"{BASE_URL}{random_movie.thumb}?X-Plex-Token={TOKEN}"
+    log.debug(f'Plex random_movie: {random_movie} => poster_url: {poster_url}')
 
     return {
         "title": random_movie.title,

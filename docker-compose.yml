@@ -10,6 +10,8 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - DEBUG=true
+      - PLEX_BASE_URL=${PLEX_BASE_URL}
+      - PLEX_TOKEN=${PLEX_TOKEN}
     ports:
       - "8000:8000"
     stdin_open: true

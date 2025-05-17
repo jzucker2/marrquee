@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 
-from .version import version
-
 from prometheus_fastapi_instrumentator import Instrumentator
 
 
 from .utils import LogHelper
+from .version import version
 from .plex import get_random_movie_poster
 
 
