@@ -1,25 +1,22 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, RedirectResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 import aiohttp
 from PIL import Image
-import os
-import time
 from io import BytesIO
+from typing import List
 import uuid
 import random
+import os
+from enum import Enum
 from .utils import LogHelper
 from .version import version
 from .plex import get_random_movie_poster
+from .cache import CacheTarget,  CustomCache
 
 
-# Configuration
-CACHE_DIR = "/data/assets"
-MAX_CACHE_AGE = 60 * 60 * 6  # 6 hours
-METADATA_FILE = os.path.join(CACHE_DIR, "metadata.json")
 RESIZE_MAX_DIM = 512
-os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 log = LogHelper.get_env_logger(__name__)
@@ -62,16 +59,6 @@ class ImageRequest(BaseModel):
     url: str
 
 
-def clean_cache():
-    """Delete cache files older than MAX_CACHE_AGE."""
-    now = time.time()
-    for filename in os.listdir(CACHE_DIR):
-        filepath = os.path.join(CACHE_DIR, filename)
-        if (os.path.isfile(filepath) and
-                now - os.path.getmtime(filepath) > MAX_CACHE_AGE):
-            os.remove(filepath)
-
-
 async def download_and_process_image(url: str) -> str:
     """Download from the URL, resize and convert to JPEG, and save."""
     log.debug(f"fetching image from url: {url}")
@@ -89,7 +76,7 @@ async def download_and_process_image(url: str) -> str:
         img.thumbnail((RESIZE_MAX_DIM, RESIZE_MAX_DIM))
 
         filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = os.path.join(CACHE_DIR, filename)
+        filepath = CustomCache.get_file_path(filename)
         img.save(filepath, "JPEG", quality=85)
 
         return filename
@@ -101,27 +88,90 @@ async def download_and_process_image(url: str) -> str:
 
 @app.get("/cache-poster")
 async def cache_random_poster():
-    clean_cache()
+    CustomCache.clean_cache(target=CacheTarget.MOVIES)
     random_movie_info = get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await download_and_process_image(actual_poster_url)
     return FileResponse(
-        os.path.join(CACHE_DIR, filename),
+        CustomCache.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/jpeg",
         filename=filename)
 
 
 @app.get("/random-cached-poster")
 def get_random_cached_poster():
-    clean_cache()
-    files = [f for f in os.listdir(CACHE_DIR) if f.endswith(".jpg")]
+    files = CustomCache.get_all_files(target=CacheTarget.MOVIES)
     if not files:
         raise HTTPException(
             status_code=404,
             detail="No cached images available")
     filename = random.choice(files)
     return FileResponse(
-        os.path.join(CACHE_DIR, filename),
+        CustomCache.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/jpeg",
         filename=filename)
+
+
+@app.get("/cache-custom-image")
+async def cache_custom_image():
+    CustomCache.clean_cache(target=CacheTarget.CUSTOM)
+    random_movie_info = get_random_movie_poster()
+    log.debug(f"redirect => random_movie_info: {random_movie_info}")
+    actual_poster_url = random_movie_info['poster_url']
+    filename = await download_and_process_image(actual_poster_url)
+    return FileResponse(
+        CustomCache.get_file_path(filename, target=CacheTarget.CUSTOM),
+        media_type="image/jpeg",
+        filename=filename)
+
+
+@app.get("/random-cached-custom")
+def get_random_cached_custom_image():
+    files = CustomCache.get_all_files(target=CacheTarget.CUSTOM)
+    if not files:
+        raise HTTPException(
+            status_code=404,
+            detail="No cached images available")
+    filename = random.choice(files)
+    return FileResponse(
+        CustomCache.get_file_path(filename, target=CacheTarget.CUSTOM),
+        media_type="image/jpeg",
+        filename=filename)
+
+
+# Enum must match the one used in CustomCache
+class CacheTarget(str, Enum):
+    movies = "movies"
+    custom = "custom"
+    both = "both"
+
+@app.get("/files", response_model=List[str])
+def list_files(target: CacheTarget = Query(CacheTarget.both)):
+    """List image files from the specified cache folder(s)."""
+    from_target = {
+        CacheTarget.movies: CacheTarget.MOVIES,
+        CacheTarget.custom: CacheTarget.CUSTOM,
+        CacheTarget.both: CacheTarget.BOTH,
+    }[target]
+
+    files = CustomCache.get_all_files(from_target)
+    filenames = [os.path.basename(f) for f in files]
+    return filenames
+
+@app.get("/files/{file_id}")
+def get_file(file_id: str, target: CacheTarget = Query(CacheTarget.both)):
+    """Serve image file by filename from the specified folder(s)."""
+    from_target = {
+        CacheTarget.movies: CacheTarget.MOVIES,
+        CacheTarget.custom: CacheTarget.CUSTOM,
+        CacheTarget.both: CacheTarget.BOTH,
+    }[target]
+
+    for folder in CustomCache.cache_dirs(from_target):
+        filepath = os.path.join(folder, file_id)
+        if os.path.isfile(filepath):
+            return FileResponse(filepath, media_type="image/jpeg")
+
+    raise HTTPException(status_code=404, detail="File not found")
+

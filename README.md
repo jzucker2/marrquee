@@ -26,3 +26,29 @@ curl -i "http://localhost:8000/cache-poster" \
 curl -i "http://localhost:8000/random-cached-poster" \
 -H "Content-Type: application/json"
 ```
+
+## Run in Prod
+
+```yaml
+services:
+
+  marrquee:
+    container_name: marrquee
+    image: ghcr.io/jzucker2/marrquee:latest
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - marrquee-storage:/data
+    environment:
+      - DEBUG=true
+      - PLEX_BASE_URL=${PLEX_BASE_URL}
+      - PLEX_TOKEN=${PLEX_TOKEN}
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
+
+volumes:
+  marrquee-storage:
+```
