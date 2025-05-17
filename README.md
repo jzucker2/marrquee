@@ -26,7 +26,7 @@ curl -i "http://10.0.1.64:1989/cache-poster" \
 curl -i "http://10.0.1.64:1989/random-cached-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://10.0.1.64:1989/images?target=movies|custom|both" \
+curl -i "http://10.0.1.64:1989/images?target=movies" \
 -H "Content-Type: application/json"
 
 curl -i "http://10.0.1.64:1989//images/{image_id}?target=..." \
