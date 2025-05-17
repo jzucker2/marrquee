@@ -82,6 +82,8 @@ async def download_and_process_image(url: str, target: CacheTarget = CacheTarget
             filename,
             target=target)
         img.save(filepath, "JPEG", quality=85)
+        log.debug(f"Saved image from url: {url} to "
+                  f"filepath: {filepath} with filename: {filename}")
 
         return filename
     except Exception as e:
