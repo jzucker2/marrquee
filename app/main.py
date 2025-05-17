@@ -125,11 +125,10 @@ async def cache_custom_image(req: ImageRequest):
     filename = f"{uuid.uuid4().hex}.jpg"
 
     await download_and_process_image(req.url)
-    filepath = IMAGE_CACHE.get_file_path(
-        filename,
-        target=CacheTarget.CUSTOM)
-
-    return FileResponse(filepath, media_type='image/jpeg', filename=filename)
+    return FileResponse(
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
+        media_type="image/jpeg",
+        filename=filename)
 
 
 @app.get("/random-cached-custom")
