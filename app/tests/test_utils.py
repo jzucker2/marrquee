@@ -6,4 +6,4 @@ def test_log_helper_debug_env_flag_is_default_false():
     actual = LogHelper.get_debug_env_flag()
     assert actual == expected
     assert isinstance(actual, bool)
-    assert actual == False
+    assert actual is False

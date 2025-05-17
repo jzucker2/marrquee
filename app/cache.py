@@ -1,6 +1,6 @@
 import os
 import time
-from enum import Enum, auto
+from enum import Enum
 from typing import List, Dict
 from .utils import LogHelper
 
@@ -61,12 +61,14 @@ class CustomCache:
             os.makedirs(folder, exist_ok=True)
 
     def clean_cache(self, target: CacheTarget = CacheTarget.BOTH) -> None:
-        """Delete cache files older than MAX_CACHE_AGE in specified folder(s)."""
+        """Delete cache files older than MAX_CACHE_AGE
+        in specified folder(s)."""
         now = time.time()
         for folder in self.cache_dirs(target):
             for filename in os.listdir(folder):
                 filepath = os.path.join(folder, filename)
-                if os.path.isfile(filepath) and now - os.path.getmtime(filepath) > MAX_CACHE_AGE:
+                if (os.path.isfile(filepath) and
+                        now - os.path.getmtime(filepath) > MAX_CACHE_AGE):
                     os.remove(filepath)
 
     def get_file_path(self, filename: str, target: CacheTarget) -> str:
@@ -76,11 +78,13 @@ class CustomCache:
         """
         folders = self.cache_dirs(target)
         if len(folders) != 1:
-            raise ValueError(f"Expected a single folder for {target}, got multiple.")
+            e_m = f"Expected a single folder for {target}, got multiple."
+            raise ValueError(e_m)
         return os.path.join(folders[0], filename)
 
-    def get_all_files(self, target: CacheTarget = CacheTarget.BOTH) -> List[str]:
-        """Returns list of full paths to all .jpg files in the specified cache folder(s)."""
+    def get_all_files(self, target: CacheTarget = CacheTarget.BOTH) -> List[str]:  # noqa: E501
+        """Returns list of full paths to all .jpg
+        files in the specified cache folder(s)."""
         all_files = []
         for folder in self.cache_dirs(target):
             try:
