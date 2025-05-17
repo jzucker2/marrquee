@@ -3,7 +3,7 @@
 You want a `.env` file like the following:
 
 ```
-PLEX_BASE_URL=http://<ip>:32400/
+PLEX_BASE_URL=http://<ip>:32400
 PLEX_TOKEN=my_plex_token
 ```
 
