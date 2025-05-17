@@ -5,8 +5,8 @@ Dockerfile
 .gitignore
 .dockerignore
 
-promspark/app/app.db
-promspark/tests/
+marrquee/app/app.db
+marrquee/tests/
 
 /node_modules
 *.DS_Store
