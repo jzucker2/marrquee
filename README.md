@@ -41,7 +41,7 @@ curl -i "http://localhost:1989/images/d1fbc6e060804688961a33a2e74da63a.jpg?targe
 curl -i "http://localhost:1989/random-image?target=movies" \
 -H "Content-Type: application/json"
 
-curl -X POST http://localhost:1989/cache-custom \
+curl -X POST http://localhost:1989/cache-custom-image \
   -H "Content-Type: application/json" \
   -d '{"url": "https://picsum.photos/200"}' --output output.jpg
 ```

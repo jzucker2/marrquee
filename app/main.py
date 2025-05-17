@@ -117,7 +117,7 @@ def get_random_cached_poster():
         filename=filename)
 
 
-@app.get("/cache-custom-image")
+@app.post("/cache-custom-image")
 async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
 
