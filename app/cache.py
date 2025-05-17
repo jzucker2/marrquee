@@ -16,7 +16,11 @@ class CacheTarget(str, Enum):
 
 # Configuration
 DEFAULT_CACHE_DIR = "/data/assets"
-MAX_CACHE_AGE = 60 * 60 * 6  # 6 hours
+DEFAULT_MAX_CACHE_AGE = 60 * 60 * 24 * 7  # 1 week
+MAX_CACHE_AGE = int(os.environ.get(
+    'MAX_CACHE_AGE',
+    DEFAULT_MAX_CACHE_AGE
+))
 
 
 class CustomCache:
