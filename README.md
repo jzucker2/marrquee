@@ -25,6 +25,12 @@ curl -i "http://localhost:8000/cache-poster" \
 
 curl -i "http://localhost:8000/random-cached-poster" \
 -H "Content-Type: application/json"
+
+curl -i "http://localhost:8000/images?target=movies|custom|both" \
+-H "Content-Type: application/json"
+
+curl -i "http://localhost:8000//images/{image_id}?target=..." \
+-H "Content-Type: application/json"
 ```
 
 ## Run in Prod

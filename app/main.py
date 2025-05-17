@@ -139,14 +139,7 @@ def get_random_cached_custom_image():
         media_type="image/jpeg",
         filename=filename)
 
-
-# Enum must match the one used in CustomCache
-class CacheTarget(str, Enum):
-    movies = "movies"
-    custom = "custom"
-    both = "both"
-
-@app.get("/files", response_model=List[str])
+@app.get("/images", response_model=List[str])
 def list_files(target: CacheTarget = Query(CacheTarget.both)):
     """List image files from the specified cache folder(s)."""
     from_target = {
@@ -159,8 +152,8 @@ def list_files(target: CacheTarget = Query(CacheTarget.both)):
     filenames = [os.path.basename(f) for f in files]
     return filenames
 
-@app.get("/files/{file_id}")
-def get_file(file_id: str, target: CacheTarget = Query(CacheTarget.both)):
+@app.get("/images/{image_id}")
+def get_file(image_id: str, target: CacheTarget = Query(CacheTarget.both)):
     """Serve image file by filename from the specified folder(s)."""
     from_target = {
         CacheTarget.movies: CacheTarget.MOVIES,
@@ -169,7 +162,7 @@ def get_file(file_id: str, target: CacheTarget = Query(CacheTarget.both)):
     }[target]
 
     for folder in CustomCache.cache_dirs(from_target):
-        filepath = os.path.join(folder, file_id)
+        filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
             return FileResponse(filepath, media_type="image/jpeg")
 
