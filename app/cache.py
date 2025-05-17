@@ -26,7 +26,8 @@ class CustomCache:
     def cache_dirs(cls, target: CacheTarget) -> List[str]:
         """Return list of cache directories based on target."""
         if target == CacheTarget.BOTH:
-            return [os.path.join(BASE_CACHE_DIR, folder) for folder in cls.SUBFOLDERS.values()]
+            return [os.path.join(BASE_CACHE_DIR, folder)
+                    for folder in cls.SUBFOLDERS.values()]
         else:
             return [os.path.join(BASE_CACHE_DIR, cls.SUBFOLDERS[target])]
 
@@ -44,7 +45,8 @@ class CustomCache:
         for folder in cls.cache_dirs(target):
             for filename in os.listdir(folder):
                 filepath = os.path.join(folder, filename)
-                if os.path.isfile(filepath) and now - os.path.getmtime(filepath) > MAX_CACHE_AGE:
+                if (os.path.isfile(filepath) and
+                        now - os.path.getmtime(filepath) > MAX_CACHE_AGE):
                     os.remove(filepath)
 
     @classmethod
@@ -54,7 +56,7 @@ class CustomCache:
         return os.path.join(folder, filename)
 
     @classmethod
-    def get_all_files(cls, target: CacheTarget = CacheTarget.BOTH) -> List[str]:
+    def get_all_files(cls, target: CacheTarget = CacheTarget.BOTH) -> List[str]:  # noqa: E501
         """Get all .jpg files in the specified cache folder(s)."""
         files = []
         for folder in cls.cache_dirs(target):
