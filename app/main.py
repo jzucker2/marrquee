@@ -75,7 +75,9 @@ async def download_and_process_image(url: str) -> str:
         img.thumbnail((RESIZE_MAX_DIM, RESIZE_MAX_DIM))
 
         filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = CustomCache.get_file_path(filename)
+        filepath = CustomCache.get_file_path(
+            filename,
+            target=CacheTarget.MOVIES)
         img.save(filepath, "JPEG", quality=85)
 
         return filename

@@ -14,22 +14,22 @@ PLEX_TOKEN=my_plex_token
 ## Debug
 
 ```
-curl -i "http://localhost:1989/random-poster" \
+curl -i "http://10.0.1.64:1989/random-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-poster-redirect" \
+curl -i "http://10.0.1.64:1989/random-poster-redirect" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/cache-poster" \
+curl -i "http://10.0.1.64:1989/cache-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-cached-poster" \
+curl -i "http://10.0.1.64:1989/random-cached-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/images?target=movies|custom|both" \
+curl -i "http://10.0.1.64:1989/images?target=movies|custom|both" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989//images/{image_id}?target=..." \
+curl -i "http://10.0.1.64:1989//images/{image_id}?target=..." \
 -H "Content-Type: application/json"
 ```
 
