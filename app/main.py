@@ -61,7 +61,7 @@ class ImageRequest(BaseModel):
     url: str
 
 
-async def download_and_process_image(url: str) -> str:
+async def download_and_process_image(url: str, target: CacheTarget = CacheTarget.MOVIES) -> str:  # noqa: E501
     """Download from the URL, resize and convert to JPEG, and save."""
     log.debug(f"fetching image from url: {url}")
     async with aiohttp.ClientSession() as session:
@@ -80,7 +80,7 @@ async def download_and_process_image(url: str) -> str:
         filename = f"{uuid.uuid4().hex}.jpg"
         filepath = IMAGE_CACHE.get_file_path(
             filename,
-            target=CacheTarget.MOVIES)
+            target=target)
         img.save(filepath, "JPEG", quality=85)
 
         return filename
@@ -118,16 +118,18 @@ def get_random_cached_poster():
 
 
 @app.get("/cache-custom-image")
-async def cache_custom_image():
+async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
-    random_movie_info = get_random_movie_poster()
-    log.debug(f"redirect => random_movie_info: {random_movie_info}")
-    actual_poster_url = random_movie_info['poster_url']
-    filename = await download_and_process_image(actual_poster_url)
-    return FileResponse(
-        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
-        media_type="image/jpeg",
-        filename=filename)
+
+    # Create a unique filename each time
+    filename = f"{uuid.uuid4().hex}.jpg"
+
+    await download_and_process_image(req.url)
+    filepath = IMAGE_CACHE.get_file_path(
+        filename,
+        target=CacheTarget.CUSTOM)
+
+    return FileResponse(filepath, media_type='image/jpeg', filename=filename)
 
 
 @app.get("/random-cached-custom")
