@@ -148,14 +148,14 @@ def get_random_cached_custom_image():
 
 
 @app.get("/images", response_model=List[str])
-def list_images(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
+def list_images(target: CacheTarget = Query(CacheTarget.BOTH)):
     """List image files from the specified cache folder(s)."""
     files = IMAGE_CACHE.get_all_files(target=target)
     return [os.path.basename(f) for f in files]
 
 
 @app.get("/random-image", response_model=List[str])
-def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
+def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):
     """List image files from the specified cache folder(s)."""
     files = IMAGE_CACHE.get_all_files(target=target)
     if not files:
@@ -170,10 +170,17 @@ def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
 
 
 @app.get("/images/{image_id}")
-def get_image(image_id: str, target: CacheTarget = Query("both", description="movies, custom, or both")):  # noqa: E501
+def get_image(image_id: str, target: CacheTarget = Query(CacheTarget.BOTH)):
     """Serve image file by filename from the specified folder(s)."""
     for folder in IMAGE_CACHE.cache_dirs(target=target):
         filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
             return FileResponse(filepath, media_type="image/jpeg")
     raise HTTPException(status_code=404, detail="File not found")
+
+
+@app.post("/cache/clear")
+def clear_cache(target: CacheTarget = Query(CacheTarget.BOTH)):
+    """Clear the cache from the specified folder(s)."""
+    IMAGE_CACHE.clean_cache(target=target)
+    return {"status": "success", "cleared": target}
