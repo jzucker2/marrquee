@@ -62,7 +62,7 @@ def test_clean_cache_removes_old_files(temp_cache):
         f.write("data")
 
     # Modify file time to simulate old file
-    old_time = time.time() - (60 * 60 * 24)  # 24 hours ago
+    old_time = time.time() - (60 * 60 * 24 * 8)  # 8 days ago
     os.utime(test_file, (old_time, old_time))
 
     assert os.path.exists(test_file)
