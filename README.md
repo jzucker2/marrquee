@@ -38,7 +38,7 @@ curl -i "http://localhost:1989/images/{image_id}?target=..." \
 curl -i "http://localhost:1989/images/d1fbc6e060804688961a33a2e74da63a.jpg?target=movies" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-images?target=movies" \
+curl -i "http://localhost:1989/random-image?target=movies" \
 -H "Content-Type: application/json"
 ```
 
