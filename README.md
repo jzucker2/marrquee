@@ -41,9 +41,9 @@ curl -i "http://localhost:1989/images/d1fbc6e060804688961a33a2e74da63a.jpg?targe
 curl -i "http://localhost:1989/random-image?target=movies" \
 -H "Content-Type: application/json"
 
-curl -X POST http://localhost:1989/cache-custom-image \
+curl -X POST http://10.0.1.64:1989/cache-custom-image \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://picsum.photos/200"}' --output output.jpg
+  -d '{"url": "https://fastly.picsum.photos/id/418/200/200.jpg?hmac=FPLIYEnmfmXtqHPsuZvUzJeXJJbbxMWNq6Evh7mMSN4"}' --output output.jpg
 ```
 
 ## Run in Prod

@@ -123,7 +123,9 @@ def get_random_cached_poster():
 async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
 
-    filename = await download_and_process_image(req.url)
+    filename = await download_and_process_image(
+        req.url,
+        target=CacheTarget.CUSTOM)
     log.debug(f"custom => download and processed filename: {filename}")
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
