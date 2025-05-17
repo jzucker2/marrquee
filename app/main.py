@@ -27,6 +27,9 @@ app = FastAPI()
 Instrumentator().instrument(app).expose(app)
 
 
+IMAGE_CACHE = CustomCache()
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
@@ -75,7 +78,7 @@ async def download_and_process_image(url: str) -> str:
         img.thumbnail((RESIZE_MAX_DIM, RESIZE_MAX_DIM))
 
         filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = CustomCache.get_file_path(
+        filepath = IMAGE_CACHE.get_file_path(
             filename,
             target=CacheTarget.MOVIES)
         img.save(filepath, "JPEG", quality=85)
@@ -89,54 +92,54 @@ async def download_and_process_image(url: str) -> str:
 
 @app.get("/cache-poster")
 async def cache_random_poster():
-    CustomCache.clean_cache(target=CacheTarget.MOVIES)
+    IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
     random_movie_info = get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await download_and_process_image(actual_poster_url)
     return FileResponse(
-        CustomCache.get_file_path(filename, target=CacheTarget.MOVIES),
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/jpeg",
         filename=filename)
 
 
 @app.get("/random-cached-poster")
 def get_random_cached_poster():
-    files = CustomCache.get_all_files(target=CacheTarget.MOVIES)
+    files = IMAGE_CACHE.get_all_files(target=CacheTarget.MOVIES)
     if not files:
         raise HTTPException(
             status_code=404,
             detail="No cached images available")
     filename = random.choice(files)
     return FileResponse(
-        CustomCache.get_file_path(filename, target=CacheTarget.MOVIES),
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/jpeg",
         filename=filename)
 
 
 @app.get("/cache-custom-image")
 async def cache_custom_image():
-    CustomCache.clean_cache(target=CacheTarget.CUSTOM)
+    IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
     random_movie_info = get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await download_and_process_image(actual_poster_url)
     return FileResponse(
-        CustomCache.get_file_path(filename, target=CacheTarget.CUSTOM),
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
         media_type="image/jpeg",
         filename=filename)
 
 
 @app.get("/random-cached-custom")
 def get_random_cached_custom_image():
-    files = CustomCache.get_all_files(target=CacheTarget.CUSTOM)
+    files = IMAGE_CACHE.get_all_files(target=CacheTarget.CUSTOM)
     if not files:
         raise HTTPException(
             status_code=404,
             detail="No cached images available")
     filename = random.choice(files)
     return FileResponse(
-        CustomCache.get_file_path(filename, target=CacheTarget.CUSTOM),
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
         media_type="image/jpeg",
         filename=filename)
 
@@ -144,14 +147,14 @@ def get_random_cached_custom_image():
 @app.get("/images", response_model=List[str])
 def list_images(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
     """List image files from the specified cache folder(s)."""
-    files = CustomCache.get_all_files(target=target)
+    files = IMAGE_CACHE.get_all_files(target=target)
     return [os.path.basename(f) for f in files]
 
 
 @app.get("/images/{image_id}")
 def get_image(image_id: str, target: CacheTarget = Query("both", description="movies, custom, or both")):  # noqa: E501
     """Serve image file by filename from the specified folder(s)."""
-    for folder in CustomCache.cache_dirs(target=target):
+    for folder in IMAGE_CACHE.cache_dirs(target=target):
         filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
             return FileResponse(filepath, media_type="image/jpeg")
