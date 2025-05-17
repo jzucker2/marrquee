@@ -67,17 +67,20 @@ def clean_cache():
     now = time.time()
     for filename in os.listdir(CACHE_DIR):
         filepath = os.path.join(CACHE_DIR, filename)
-        if os.path.isfile(filepath) and now - os.path.getmtime(filepath) > MAX_CACHE_AGE:
+        if (os.path.isfile(filepath) and
+                now - os.path.getmtime(filepath) > MAX_CACHE_AGE):
             os.remove(filepath)
 
 
 async def download_and_process_image(url: str) -> str:
-    """Download from the hardcoded URL, resize and convert to JPEG, and save."""
+    """Download from the URL, resize and convert to JPEG, and save."""
     log.debug(f"fetching image from url: {url}")
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                raise HTTPException(status_code=resp.status, detail="Failed to fetch image")
+                raise HTTPException(
+                    status_code=resp.status,
+                    detail="Failed to fetch image")
             content = await resp.read()
 
     try:
@@ -91,7 +94,9 @@ async def download_and_process_image(url: str) -> str:
 
         return filename
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image processing failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Image processing failed: {str(e)}")
 
 
 @app.get("/cache-poster")
@@ -101,7 +106,10 @@ async def cache_random_poster():
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await download_and_process_image(actual_poster_url)
-    return FileResponse(os.path.join(CACHE_DIR, filename), media_type="image/jpeg", filename=filename)
+    return FileResponse(
+        os.path.join(CACHE_DIR, filename),
+        media_type="image/jpeg",
+        filename=filename)
 
 
 @app.get("/random-cached-poster")
@@ -109,6 +117,11 @@ def get_random_cached_poster():
     clean_cache()
     files = [f for f in os.listdir(CACHE_DIR) if f.endswith(".jpg")]
     if not files:
-        raise HTTPException(status_code=404, detail="No cached images available")
+        raise HTTPException(
+            status_code=404,
+            detail="No cached images available")
     filename = random.choice(files)
-    return FileResponse(os.path.join(CACHE_DIR, filename), media_type="image/jpeg", filename=filename)
+    return FileResponse(
+        os.path.join(CACHE_DIR, filename),
+        media_type="image/jpeg",
+        filename=filename)
