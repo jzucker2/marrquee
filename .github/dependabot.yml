@@ -44,3 +44,4 @@ updates:
       - dependency-name: "fastapi*"
       - dependency-name: "prometheus*"
       - dependency-name: "fastapi-utils*"
+      - dependency-name: "PlexAPI"
