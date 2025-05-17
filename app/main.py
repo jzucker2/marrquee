@@ -121,10 +121,7 @@ def get_random_cached_poster():
 async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
 
-    # Create a unique filename each time
-    filename = f"{uuid.uuid4().hex}.jpg"
-
-    await download_and_process_image(req.url)
+    filename = await download_and_process_image(req.url)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
         media_type="image/jpeg",
