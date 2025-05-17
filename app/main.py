@@ -9,7 +9,6 @@ from typing import List
 import uuid
 import random
 import os
-from enum import Enum
 from .utils import LogHelper
 from .version import version
 from .plex import get_random_movie_poster
@@ -183,4 +182,3 @@ def get_image(image_id: str, target: CacheTarget = Query("both", description="mo
             return FileResponse(filepath, media_type="image/jpeg")
 
     raise HTTPException(status_code=404, detail="File not found")
-
