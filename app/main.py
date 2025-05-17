@@ -151,6 +151,21 @@ def list_images(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
     return [os.path.basename(f) for f in files]
 
 
+@app.get("/random-image", response_model=List[str])
+def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):  # noqa: E501
+    """List image files from the specified cache folder(s)."""
+    files = IMAGE_CACHE.get_all_files(target=target)
+    if not files:
+        raise HTTPException(
+            status_code=404,
+            detail="No cached images available")
+    filename = random.choice(files)
+    return FileResponse(
+        IMAGE_CACHE.get_file_path(filename, target=target),
+        media_type="image/jpeg",
+        filename=filename)
+
+
 @app.get("/images/{image_id}")
 def get_image(image_id: str, target: CacheTarget = Query("both", description="movies, custom, or both")):  # noqa: E501
     """Serve image file by filename from the specified folder(s)."""
