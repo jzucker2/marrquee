@@ -38,6 +38,7 @@ def random_poster():
 @app.get("/random-poster-redirect")
 def redirect_to_poster():
     random_movie_info = get_random_movie_poster()
-    log.debug(f"")
+    log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
+    log.debug(f"redirect => actual_poster_url: {actual_poster_url}")
     return RedirectResponse(actual_poster_url)
