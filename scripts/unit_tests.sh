@@ -8,7 +8,7 @@ export PROMETHEUS_MULTIPROC_DIR
 : ${prometheus_multiproc_dir:=/tmp}
 export prometheus_multiproc_dir
 # intended for local running on pi
-: ${METRICS_PORT:=8000}
+: ${METRICS_PORT:=1989}
 export METRICS_PORT
 
 

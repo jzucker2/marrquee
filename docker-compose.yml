@@ -15,7 +15,7 @@ services:
       - PLEX_BASE_URL=${PLEX_BASE_URL}
       - PLEX_TOKEN=${PLEX_TOKEN}
     ports:
-      - "8000:8000"
+      - "1989:1989"
     stdin_open: true
     tty: true
 

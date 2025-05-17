@@ -14,22 +14,22 @@ PLEX_TOKEN=my_plex_token
 ## Debug
 
 ```
-curl -i "http://localhost:8000/random-poster" \
+curl -i "http://localhost:1989/random-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:8000/random-poster-redirect" \
+curl -i "http://localhost:1989/random-poster-redirect" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:8000/cache-poster" \
+curl -i "http://localhost:1989/cache-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:8000/random-cached-poster" \
+curl -i "http://localhost:1989/random-cached-poster" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:8000/images?target=movies|custom|both" \
+curl -i "http://localhost:1989/images?target=movies|custom|both" \
 -H "Content-Type: application/json"
 
-curl -i "http://localhost:8000//images/{image_id}?target=..." \
+curl -i "http://localhost:1989//images/{image_id}?target=..." \
 -H "Content-Type: application/json"
 ```
 
@@ -51,7 +51,7 @@ services:
       - PLEX_BASE_URL=${PLEX_BASE_URL}
       - PLEX_TOKEN=${PLEX_TOKEN}
     ports:
-      - "8000:8000"
+      - "1989:1989"
     stdin_open: true
     tty: true
 
