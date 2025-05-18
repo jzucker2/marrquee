@@ -59,7 +59,8 @@ class ImageProcessor:
         size=(800, 480),
     ):
         image = image.convert('RGB')
-        image = image.thumbnail(size, Image.LANCZOS)
+        # image.thumbnail(size, Image.LANCZOS)
+        image = image.resize(size, Image.LANCZOS)
 
         # Create new image with optimized palette
         optimized = Image.new('RGB', image.size)
