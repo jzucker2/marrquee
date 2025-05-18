@@ -35,28 +35,11 @@ class ImageProcessor:
             key=lambda c: (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2)
 
     @classmethod
-    def convert_image_for_eink(cls, input_path, output_path, size=(480, 800)):
-        image = Image.open(input_path).convert('RGB')
-        image = image.resize(size, Image.LANCZOS)
-
-        # Create new image with optimized palette
-        optimized = Image.new('RGB', image.size)
-        pixels = optimized.load()
-        for y in range(image.size[1]):
-            for x in range(image.size[0]):
-                original = image.getpixel((x, y))
-                pixels[x, y] = cls.closest_color(original)
-
-        optimized.save(output_path, format='PNG')
-        log.debug(f"Saved optimized image to {output_path}")
-        return output_path
-
-    @classmethod
     def _process_image_and_save(
         cls,
         image: ImageFile,
         output_path: str,
-        size=(800, 480),
+        size=(480, 800),
     ):
         image = image.convert('RGB')
         # image.thumbnail(size, Image.LANCZOS)
