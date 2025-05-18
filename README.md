@@ -14,38 +14,38 @@ PLEX_TOKEN=my_plex_token
 ## Debug
 
 ```
-curl -i "http://localhost:1989/random-poster" \
+curl -i "http://10.0.1.64:1989/random-poster" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-poster-redirect" \
+curl -i "http://10.0.1.64:1989/random-poster-redirect" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/cache-poster" \
+curl -i "http://10.0.1.64:1989/cache-poster" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-cached-poster" \
+curl -i "http://10.0.1.64:1989/random-cached-poster" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/images?target=movies|custom|both" \
+curl -i "http://10.0.1.64:1989/images?target=movies|custom|both" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/images?target=movies" \
+curl -i "http://10.0.1.64:1989/images?target=movies" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/images/{image_id}?target=..." \
+curl -i "http://10.0.1.64:1989/images/{image_id}?target=..." \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/images/d1fbc6e060804688961a33a2e74da63a.jpg?target=movies" \
+curl -i "http://10.0.1.64:1989/images/d1fbc6e060804688961a33a2e74da63a.jpg?target=movies" \
   -H "Content-Type: application/json"
 
-curl -i "http://localhost:1989/random-image?target=movies" \
+curl -i "http://10.0.1.64:1989/random-image?target=movies" \
   -H "Content-Type: application/json"
 
-curl -X POST http://localhost:1989/cache-custom-image \
+curl -X POST http://10.0.1.64:1989/cache-custom-image \
   -H "Content-Type: application/json" \
   -d '{"url": "https://fastly.picsum.photos/id/418/200/200.jpg?hmac=FPLIYEnmfmXtqHPsuZvUzJeXJJbbxMWNq6Evh7mMSN4"}' --output output.jpg
 
-curl -X POST "http://localhost:1989/cache/clear?target=movies" \
+curl -X POST "http://10.0.1.64:1989/cache/clear?target=movies" \
   -H "Content-Type: application/json"
 ```
 

@@ -83,7 +83,7 @@ class ImageProcessor:
         try:
             img = Image.open(BytesIO(content))
 
-            filename = f"{uuid.uuid4().hex}.jpg"
+            filename = f"{uuid.uuid4().hex}.png"
             filepath = custom_cache.get_file_path(
                 filename,
                 target=target)

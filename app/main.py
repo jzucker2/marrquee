@@ -66,7 +66,7 @@ async def cache_random_poster():
         IMAGE_CACHE)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -80,7 +80,7 @@ def get_random_cached_poster():
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -95,7 +95,7 @@ async def cache_custom_image(req: ImageRequest):
     log.debug(f"custom => download and processed filename: {filename}")
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -109,7 +109,7 @@ def get_random_cached_custom_image():
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -131,7 +131,7 @@ def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=target),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -141,7 +141,7 @@ def get_image(image_id: str, target: CacheTarget = Query(CacheTarget.BOTH)):
     for folder in IMAGE_CACHE.cache_dirs(target=target):
         filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
-            return FileResponse(filepath, media_type="image/jpeg")
+            return FileResponse(filepath, media_type="image/png")
     raise HTTPException(status_code=404, detail="File not found")
 
 

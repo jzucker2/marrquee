@@ -95,7 +95,7 @@ class CustomCache:
         return os.path.join(folders[0], filename)
 
     def get_all_files(self, target: CacheTarget = CacheTarget.BOTH) -> List[str]:  # noqa: E501
-        """Returns list of full paths to all .jpg
+        """Returns list of full paths to all .png
         files in the specified cache folder(s)."""
         all_files = []
         for folder in self.cache_dirs(target):
@@ -103,7 +103,7 @@ class CustomCache:
                 all_files += [
                     os.path.join(folder, f)
                     for f in os.listdir(folder)
-                    if f.endswith(".jpg")
+                    if f.endswith(".png")
                 ]
             except FileNotFoundError:
                 continue  # Folder may not exist yet, skip it gracefully
