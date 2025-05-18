@@ -59,11 +59,13 @@ class ImageRequest(BaseModel):
 async def cache_random_poster():
     IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
     random_movie_info = get_random_movie_poster()
-    log.debug(f"redirect => random_movie_info: {random_movie_info}")
+    log.debug(f"cache => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await ImageProcessor.download_and_process_image(
         actual_poster_url,
         IMAGE_CACHE)
+    log.debug(f'random_movie_info: {random_movie_info} '
+              f'got filename: {filename}')
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/png",
