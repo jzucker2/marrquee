@@ -15,13 +15,13 @@ RESIZE_MAX_DIM = 512
 
 # Supported 7-color E-Ink palette
 PALETTE = [
-    (0, 0, 0),       # Black
-    (255, 255, 255), # White
-    (255, 0, 0),     # Red
-    (0, 255, 0),     # Green
-    (0, 0, 255),     # Blue
-    (255, 255, 0),   # Yellow
-    (255, 165, 0),   # Orange
+    (0, 0, 0),        # Black
+    (255, 255, 255),  # White
+    (255, 0, 0),      # Red
+    (0, 255, 0),      # Green
+    (0, 0, 255),      # Blue
+    (255, 255, 0),    # Yellow
+    (255, 165, 0),    # Orange
 ]
 
 
@@ -29,7 +29,9 @@ class ImageProcessor:
     @classmethod
     def closest_color(cls, rgb):
         r, g, b = rgb
-        return min(PALETTE, key=lambda c: (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2)
+        return min(
+            PALETTE,
+            key=lambda c: (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2)
 
     @classmethod
     def convert_image_for_eink(cls, input_path, output_path, size=(800, 480)):
