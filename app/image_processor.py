@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import aiohttp
-from PIL import Image, ImageFile
-from PIL.ImageFile import Imae
+from PIL import Image
+from PIL.ImageFile import ImageFile
 from io import BytesIO
 import uuid
 from .utils import LogHelper
