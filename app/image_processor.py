@@ -35,7 +35,7 @@ class ImageProcessor:
             key=lambda c: (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2)
 
     @classmethod
-    def convert_image_for_eink(cls, input_path, output_path, size=(800, 480)):
+    def convert_image_for_eink(cls, input_path, output_path, size=(480, 800)):
         image = Image.open(input_path).convert('RGB')
         image = image.resize(size, Image.LANCZOS)
 
