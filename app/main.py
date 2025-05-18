@@ -13,9 +13,7 @@ from .utils import LogHelper
 from .version import version
 from .plex import get_random_movie_poster
 from .cache import CacheTarget,  CustomCache
-
-
-RESIZE_MAX_DIM = 512
+from .image_processor import ImageProcessor
 
 
 log = LogHelper.get_env_logger(__name__)
@@ -61,44 +59,15 @@ class ImageRequest(BaseModel):
     url: str
 
 
-async def download_and_process_image(url: str, target: CacheTarget = CacheTarget.MOVIES) -> str:  # noqa: E501
-    """Download from the URL, resize and convert to JPEG, and save."""
-    log.debug(f"fetching image from url: {url}")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status != 200:
-                raise HTTPException(
-                    status_code=resp.status,
-                    detail="Failed to fetch image")
-            content = await resp.read()
-
-    try:
-        img = Image.open(BytesIO(content))
-        img = img.convert("RGB")
-        img.thumbnail((RESIZE_MAX_DIM, RESIZE_MAX_DIM))
-
-        filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = IMAGE_CACHE.get_file_path(
-            filename,
-            target=target)
-        img.save(filepath, "JPEG", quality=85)
-        log.debug(f"Saved image from url: {url} to "
-                  f"filepath: {filepath} with filename: {filename}")
-
-        return filename
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Image processing failed: {str(e)}")
-
-
 @app.get("/cache-poster")
 async def cache_random_poster():
     IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
     random_movie_info = get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
-    filename = await download_and_process_image(actual_poster_url)
+    filename = await ImageProcessor.download_and_process_image(
+        actual_poster_url,
+        IMAGE_CACHE)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/jpeg",
@@ -123,8 +92,9 @@ def get_random_cached_poster():
 async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
 
-    filename = await download_and_process_image(
+    filename = await ImageProcessor.download_and_process_image(
         req.url,
+        IMAGE_CACHE,
         target=CacheTarget.CUSTOM)
     log.debug(f"custom => download and processed filename: {filename}")
     return FileResponse(
