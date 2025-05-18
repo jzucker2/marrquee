@@ -2,17 +2,13 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, RedirectResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
-import aiohttp
-from PIL import Image
-from io import BytesIO
 from typing import List
-import uuid
 import random
 import os
 from .utils import LogHelper
 from .version import version
 from .plex import get_random_movie_poster
-from .cache import CacheTarget,  CustomCache
+from .cache import CacheTarget, CustomCache
 from .image_processor import ImageProcessor
 
 
