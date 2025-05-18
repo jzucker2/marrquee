@@ -52,7 +52,12 @@ class ImageProcessor:
         return output_path
 
     @classmethod
-    def _process_image_and_save(cls, image, output_path: str, size=(800, 480)):
+    def _process_image_and_save(
+        cls,
+        image: ImageFile,
+        output_path: str,
+        size=(800, 480),
+    ):
         image = image.convert('RGB')
         image = image.thumbnail(size, Image.LANCZOS)
 
