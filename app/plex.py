@@ -17,14 +17,34 @@ log.debug(f'Plex BASE_URL: {BASE_URL}')
 plex = PlexServer(BASE_URL, TOKEN)
 
 
-def get_random_movie_poster():
-    movies = plex.library.section('Movies').all()
-    random_movie = random.choice(movies)
-    log.debug(f'Plex random_movie: {random_movie}')
-    poster_url = f"{BASE_URL}{random_movie.thumb}?X-Plex-Token={TOKEN}"
-    log.debug(f'Plex random_movie: {random_movie} => poster_url: {poster_url}')
+class PlexClient:
+    @classmethod
+    def get_random_movie_poster(cls):
+        movies = plex.library.section('Movies').all()
+        random_movie = random.choice(movies)
+        log.debug(f'Plex random_movie: {random_movie}')
+        poster_url = f"{BASE_URL}{random_movie.thumb}?X-Plex-Token={TOKEN}"
+        log.debug(f'Plex random_movie: {random_movie} => poster_url: {poster_url}')
 
-    return {
-        "title": random_movie.title,
-        "poster_url": poster_url
-    }
+        return {
+            "title": random_movie.title,
+            "poster_url": poster_url
+        }
+
+    @classmethod
+    def get_manual_movie_poster(cls, movie_title):
+        try:
+            movie = plex.library.section('Movies').get(movie_title)
+            log.debug(f'Plex movie: {movie}')
+            poster_url = f"{BASE_URL}{movie.thumb}?X-Plex-Token={TOKEN}"
+            log.debug(f'Plex movie: {movie} => poster_url: {poster_url}')
+
+            return {
+                "title": movie.title,
+                "poster_url": poster_url
+            }
+        except Exception as e:
+            log.error(f"Failed to find movie '{movie_title}': {e}")
+            return {
+                "error": f"Movie '{movie_title}' not found."
+            }

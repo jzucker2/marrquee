@@ -45,6 +45,10 @@ curl -X POST http://localhost:1989/cache-custom-image \
   -H "Content-Type: application/json" \
   -d '{"url": "https://fastly.picsum.photos/id/418/200/200.jpg?hmac=FPLIYEnmfmXtqHPsuZvUzJeXJJbbxMWNq6Evh7mMSN4"}' --output output.jpg
 
+curl -X POST http://localhost:1989/cache-manual-poster \
+  -H "Content-Type: application/json" \
+  -d '{"movie_title": "You Were Never Really Here"}' --output output.jpg
+
 curl -X POST "http://localhost:1989/cache/clear?target=movies" \
   -H "Content-Type: application/json"
 ```

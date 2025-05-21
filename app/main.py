@@ -7,7 +7,7 @@ import random
 import os
 from .utils import LogHelper
 from .version import version
-from .plex import get_random_movie_poster
+from .plex import PlexClient
 from .cache import CacheTarget, CustomCache
 from .image_processor import ImageProcessor
 
@@ -39,12 +39,12 @@ def healthcheck():
 
 @app.get("/random-poster")
 def random_poster():
-    return get_random_movie_poster()
+    return PlexClient.get_random_movie_poster()
 
 
 @app.get("/random-poster-redirect")
 def redirect_to_poster():
-    random_movie_info = get_random_movie_poster()
+    random_movie_info = PlexClient.get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     log.debug(f"redirect => actual_poster_url: {actual_poster_url}")
@@ -55,10 +55,14 @@ class ImageRequest(BaseModel):
     url: str
 
 
+class ManualPosterRequest(BaseModel):
+    movie_title: str
+
+
 @app.get("/cache-poster")
 async def cache_random_poster():
     IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
-    random_movie_info = get_random_movie_poster()
+    random_movie_info = PlexClient.get_random_movie_poster()
     log.debug(f"cache => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     filename = await ImageProcessor.download_and_process_image(
@@ -80,6 +84,23 @@ def get_random_cached_poster():
             status_code=404,
             detail="No cached images available")
     filename = random.choice(files)
+    return FileResponse(
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
+        media_type="image/png",
+        filename=filename)
+
+
+@app.post("/cache-manual-poster")
+async def cache_manual_poster(req: ManualPosterRequest):
+    IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
+    manual_movie_info = PlexClient.get_manual_movie_poster(req.movie_title)
+    log.debug(f"cache => manual_movie_info: {manual_movie_info}")
+    actual_poster_url = manual_movie_info['poster_url']
+    filename = await ImageProcessor.download_and_process_image(
+        actual_poster_url,
+        IMAGE_CACHE)
+    log.debug(f'manual_movie_info: {manual_movie_info} '
+              f'got filename: {filename}')
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
         media_type="image/png",
