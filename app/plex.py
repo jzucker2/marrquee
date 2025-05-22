@@ -32,7 +32,8 @@ class PlexClient:
         random_movie = random.choice(movies)
         log.debug(f'Plex random_movie: {random_movie}')
         poster_url = f"{BASE_URL}{random_movie.thumb}?X-Plex-Token={TOKEN}"
-        log.debug(f'Plex random_movie: {random_movie} => poster_url: {poster_url}')
+        log.debug(f'Plex random_movie: {random_movie} '
+                  f'=> poster_url: {poster_url}')
 
         return {
             "title": random_movie.title,
