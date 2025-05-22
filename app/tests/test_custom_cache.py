@@ -5,7 +5,7 @@ import shutil
 import pytest
 from pathlib import Path
 
-from ..cache import CustomCache, CacheTarget  # Replace with actual path
+from ..cache import CustomCache, CacheTarget
 
 
 @pytest.fixture(scope="function")
@@ -29,18 +29,18 @@ def test_cache_dirs_resolve_correctly(temp_cache):
 
 
 def test_get_file_path_returns_expected_path(temp_cache):
-    filename = "test.jpg"
+    filename = "test.png"
     path = temp_cache.get_file_path(filename, CacheTarget.CUSTOM)
     assert path.endswith(f"{CacheTarget.CUSTOM.value}/{filename}")
     assert isinstance(path, str)
 
 
-def test_get_all_files_lists_only_jpgs(temp_cache):
+def test_get_all_files_lists_only_pngs(temp_cache):
     custom_dir = temp_cache.cache_dirs(CacheTarget.CUSTOM)[0]
     movie_dir = temp_cache.cache_dirs(CacheTarget.MOVIES)[0]
 
-    Path(os.path.join(custom_dir, "a.jpg")).write_text("fake")
-    Path(os.path.join(movie_dir, "b.jpg")).write_text("fake")
+    Path(os.path.join(custom_dir, "a.png")).write_text("fake")
+    Path(os.path.join(movie_dir, "b.png")).write_text("fake")
     Path(os.path.join(movie_dir, "not_an_image.txt")).write_text("skip")
 
     files_custom = temp_cache.get_all_files(CacheTarget.CUSTOM)
@@ -48,15 +48,15 @@ def test_get_all_files_lists_only_jpgs(temp_cache):
     files_both = temp_cache.get_all_files(CacheTarget.BOTH)
 
     assert len(files_custom) == 1
-    assert files_custom[0].endswith("a.jpg")
+    assert files_custom[0].endswith("a.png")
     assert len(files_movies) == 1
-    assert files_movies[0].endswith("b.jpg")
+    assert files_movies[0].endswith("b.png")
     assert len(files_both) == 2
 
 
 def test_clean_cache_removes_old_files(temp_cache):
     movie_dir = temp_cache.cache_dirs(CacheTarget.MOVIES)[0]
-    test_file = os.path.join(movie_dir, "old.jpg")
+    test_file = os.path.join(movie_dir, "old.png")
 
     with open(test_file, "w") as f:
         f.write("data")
@@ -72,4 +72,4 @@ def test_clean_cache_removes_old_files(temp_cache):
 
 def test_get_file_path_raises_for_both(temp_cache):
     with pytest.raises(ValueError):
-        temp_cache.get_file_path("file.jpg", CacheTarget.BOTH)
+        temp_cache.get_file_path("file.png", CacheTarget.BOTH)

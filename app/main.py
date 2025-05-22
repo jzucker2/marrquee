@@ -2,20 +2,14 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, RedirectResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
-import aiohttp
-from PIL import Image
-from io import BytesIO
 from typing import List
-import uuid
 import random
 import os
 from .utils import LogHelper
 from .version import version
-from .plex import get_random_movie_poster
-from .cache import CacheTarget,  CustomCache
-
-
-RESIZE_MAX_DIM = 512
+from .plex import PlexClient
+from .cache import CacheTarget, CustomCache
+from .image_processor import ImageProcessor
 
 
 log = LogHelper.get_env_logger(__name__)
@@ -45,12 +39,12 @@ def healthcheck():
 
 @app.get("/random-poster")
 def random_poster():
-    return get_random_movie_poster()
+    return PlexClient.get_random_movie_poster()
 
 
 @app.get("/random-poster-redirect")
 def redirect_to_poster():
-    random_movie_info = get_random_movie_poster()
+    random_movie_info = PlexClient.get_random_movie_poster()
     log.debug(f"redirect => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
     log.debug(f"redirect => actual_poster_url: {actual_poster_url}")
@@ -61,47 +55,24 @@ class ImageRequest(BaseModel):
     url: str
 
 
-async def download_and_process_image(url: str, target: CacheTarget = CacheTarget.MOVIES) -> str:  # noqa: E501
-    """Download from the URL, resize and convert to JPEG, and save."""
-    log.debug(f"fetching image from url: {url}")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status != 200:
-                raise HTTPException(
-                    status_code=resp.status,
-                    detail="Failed to fetch image")
-            content = await resp.read()
-
-    try:
-        img = Image.open(BytesIO(content))
-        img = img.convert("RGB")
-        img.thumbnail((RESIZE_MAX_DIM, RESIZE_MAX_DIM))
-
-        filename = f"{uuid.uuid4().hex}.jpg"
-        filepath = IMAGE_CACHE.get_file_path(
-            filename,
-            target=target)
-        img.save(filepath, "JPEG", quality=85)
-        log.debug(f"Saved image from url: {url} to "
-                  f"filepath: {filepath} with filename: {filename}")
-
-        return filename
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Image processing failed: {str(e)}")
+class ManualPosterRequest(BaseModel):
+    movie_title: str
 
 
 @app.get("/cache-poster")
 async def cache_random_poster():
     IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
-    random_movie_info = get_random_movie_poster()
-    log.debug(f"redirect => random_movie_info: {random_movie_info}")
+    random_movie_info = PlexClient.get_random_movie_poster()
+    log.debug(f"cache => random_movie_info: {random_movie_info}")
     actual_poster_url = random_movie_info['poster_url']
-    filename = await download_and_process_image(actual_poster_url)
+    filename = await ImageProcessor.download_and_process_image(
+        actual_poster_url,
+        IMAGE_CACHE)
+    log.debug(f'random_movie_info: {random_movie_info} '
+              f'got filename: {filename}')
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -115,7 +86,24 @@ def get_random_cached_poster():
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
-        media_type="image/jpeg",
+        media_type="image/png",
+        filename=filename)
+
+
+@app.post("/cache-manual-poster")
+async def cache_manual_poster(req: ManualPosterRequest):
+    IMAGE_CACHE.clean_cache(target=CacheTarget.MOVIES)
+    manual_movie_info = PlexClient.get_manual_movie_poster(req.movie_title)
+    log.debug(f"cache => manual_movie_info: {manual_movie_info}")
+    actual_poster_url = manual_movie_info['poster_url']
+    filename = await ImageProcessor.download_and_process_image(
+        actual_poster_url,
+        IMAGE_CACHE)
+    log.debug(f'manual_movie_info: {manual_movie_info} '
+              f'got filename: {filename}')
+    return FileResponse(
+        IMAGE_CACHE.get_file_path(filename, target=CacheTarget.MOVIES),
+        media_type="image/png",
         filename=filename)
 
 
@@ -123,13 +111,14 @@ def get_random_cached_poster():
 async def cache_custom_image(req: ImageRequest):
     IMAGE_CACHE.clean_cache(target=CacheTarget.CUSTOM)
 
-    filename = await download_and_process_image(
+    filename = await ImageProcessor.download_and_process_image(
         req.url,
+        IMAGE_CACHE,
         target=CacheTarget.CUSTOM)
     log.debug(f"custom => download and processed filename: {filename}")
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -143,7 +132,7 @@ def get_random_cached_custom_image():
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=CacheTarget.CUSTOM),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -165,7 +154,7 @@ def random_image(target: CacheTarget = Query(CacheTarget.BOTH)):
     filename = random.choice(files)
     return FileResponse(
         IMAGE_CACHE.get_file_path(filename, target=target),
-        media_type="image/jpeg",
+        media_type="image/png",
         filename=filename)
 
 
@@ -175,7 +164,7 @@ def get_image(image_id: str, target: CacheTarget = Query(CacheTarget.BOTH)):
     for folder in IMAGE_CACHE.cache_dirs(target=target):
         filepath = os.path.join(folder, image_id)
         if os.path.isfile(filepath):
-            return FileResponse(filepath, media_type="image/jpeg")
+            return FileResponse(filepath, media_type="image/png")
     raise HTTPException(status_code=404, detail="File not found")
 
 
