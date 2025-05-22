@@ -58,7 +58,9 @@ curl -X POST "http://${MARRQUEE_HOST}:1989/cache/clear?target=movies" \
 Fill up cache
 
 ```
-for i in {1..100}; do   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:1989/cache-poster);   echo "Request $i - Status: $STATUS";   sleep 2; done
+export MARRQUEE_HOST=localhost
+
+for i in {1..100}; do   STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${MARRQUEE_HOST}:1989/cache-poster);   echo "Request $i - Status: $STATUS";   sleep 2; done
 ```
 
 ## Run in Prod
